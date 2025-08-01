@@ -1,0 +1,41 @@
+name: Docker Compose Build & Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Docker image version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ github.event.inputs.version }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: 🧱 Build services with Docker Compose
+        run: |
+          docker-compose build --build-arg VERSION=$VERSION
+
+      - name: 🏷️ Tag and push backend image
+        run: |
+          docker tag $DOCKERHUB_USERNAME/todo-backend $DOCKERHUB_USERNAME/todo-backend:$VERSION
+          docker push $DOCKERHUB_USERNAME/todo-backend:$VERSION
+
+      - name: 🏷️ Tag and push frontend image
+        run: |
+          docker tag $DOCKERHUB_USERNAME/todo-frontend $DOCKERHUB_USERNAME/todo-frontend:$VERSION
+          docker push $DOCKERHUB_USERNAME/todo-frontend:$VERSION
