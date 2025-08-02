@@ -27,7 +27,7 @@ A full-stack Todo application built using **MongoDB**, **Express**, **React**, a
 ├── frontend
 │   └── Dockerfile
 ├── docker-compose.yml
-├── .github/workflows/ci-cd.yml
+├── .github/workflows/docker-cicd.yml
 └── README.md
 ```
 
@@ -41,7 +41,7 @@ A full-stack Todo application built using **MongoDB**, **Express**, **React**, a
 docker-compose up --build
 ```
 
-Frontend will be available at: `http://localhost:3000`  
+Frontend will be available at: `http://localhost:5173`  
 Backend API: `http://localhost:5000/api/todos`
 
 ### 2. Push to Docker Hub
@@ -94,6 +94,4 @@ VITE_API_URL=http://localhost:5000
 
 ---
 
-## ☁️ Optional: Deploy to Render / Azure / Railway
-
-You can deploy the Docker images to cloud providers. See the `infra` folder (if added) for Terraform deployment on Azure.
+## ☁️ Optional: Deploy to Render / Azure /
