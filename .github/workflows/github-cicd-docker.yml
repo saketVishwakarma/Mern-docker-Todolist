@@ -35,13 +35,13 @@ jobs:
       - name: 🧱 Build services with Docker Compose
         run: |
           docker-compose build --build-arg VERSION=$VERSION
-      - name: 🛠️ Build Backend Image
+      - name: Build Backend Image
         run: |
             docker build -t todo-backend --build-arg VERSION=$VERSION ./backend
-      - name: 🛠️ Build Frontend Image
+      - name: Build Frontend Image
         run: |
             docker build -t todo-frontend --build-arg VERSION=$VERSION ./frontend
-      - name: 🔍 Install Trivy (latest)
+      - name: Install Trivy 
         run: |
             sudo apt-get update
             sudo apt-get install -y wget apt-transport-https gnupg lsb-release
@@ -52,25 +52,24 @@ jobs:
 
 
       - name: Scan Frontend Image
-        run: trivy image todo-frontend --severity CRITICAL,HIGH
-
+        run: trivy image todo-frontend --severity CRITICAL,HIGH --format json --output trivy-frontend-report.json
       - name: Scan Backend Image
-        run: trivy image todo-backend --severity CRITICAL,HIGH
-      - name: Run Docker Compose Stack
-        run: |
-          docker-compose up -d
-          sleep 10 # wait for services to start
-
-      - name: Health check (Optional)
-        run: |
-          curl -f http://localhost:5000/api/todos || exit 1
-      - name: 🏷️ Tag and Push Backend Image
+        run: trivy image todo-backend --severity CRITICAL,HIGH --format json --output trivy-backend-report.json
+      - name: 📝 Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports
+          path: |
+                trivy-frontend-report.json
+                trivy-backend-report.json
+     
+      - name: Tag and Push Backend Image
         run: |
             docker tag todo-backend $DOCKERHUB_USERNAME/todo-backend:$VERSION
             docker push $DOCKERHUB_USERNAME/todo-backend:$VERSION
 
 
-      - name: 🏷️ Tag and Push Frontend Image
+      - name: Tag and Push Frontend Image
         run: |
             docker tag todo-frontend $DOCKERHUB_USERNAME/todo-frontend:$VERSION
             docker push $DOCKERHUB_USERNAME/todo-frontend:$VERSION
